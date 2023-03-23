@@ -1,31 +1,37 @@
 # %% [python]
-from code import interact
 import numpy as np
 import matplotlib as mp
 import matplotlib.pyplot as plt
 
 # import math as mt
-import ipywidgets as ipy
+from ipywidgets import (
+    interact,
+    interactive,
+    fixed,
+    IntSlider,
+    FloatSlider,
+    embed,
+    interact_manual,
+)
+import ipywidgets as widgets
 from functools import reduce
 
-# %% {markdown}
-## "The 'classical' Central Limit Theorem states that if have IID variables where the variance of the marginal distribution is finite, then the sum of the variables is converging in distribution to a **Normal distribution**.",
-"Thus, if $$X_1,X_2,\\dots,X_n$$ are IID variables where $$\\mathbb{E}(X_i)=\\mu$$ and $$\\mathbb{V}(X_i)=\\sigma^2$$, then for $W_n=\\sum_{i=1}^n X_i$ we can write ",
-
-"\\begin{equation}",
-"W_n \\overset{\\rm d}{\\longrightarrow} N(n\\mu,\\sqrt{n}\\sigma), \onumber\n",
-"\\end{equation}",
-"where we used the fact that both the sum and the variance can be simply summed for independent variables. As we can see, when $n\\rightarrow\\infty$, we obtain a Normal distribution with infinitely large mean and variance. ",
-"The usual trick is to consider a **standardised** version of the sum of the variables, where we shift the variable such that the mean becomes 0 and rescale the variable such that the variance becomes 1. In this case this can be done simply by defining $Z_n$ as",
-
-"\\begin{equation}",
-"Z_n =\\frac{\\left(\\sum_{i=1}^n X_i\\right) -n\\mu}{\\sqrt{n}\\sigma}=",
-"\\frac{\\frac{1}{n}\\left(\\sum_{i=1}^n X_i\\right) - \\mu}{\\sigma/\\sqrt{n}} =\\frac{\\sqrt{n}\\left(\\overline{X_n}-\\mu\\right)}{\\sigma},",
-"\\end{equation}",
-"which is converging to standard Normal in distribution, ",
-"\\begin{equation}",
-"Z_n\\overset{\\rm d}{\\longrightarrow}N(0,1).",
-"\\end{equation}",
+# %% [markdown] {"incorrectly_encoded_metadata": "{markdown}"}
+# ##### The 'classical' Central Limit Theorem states that if have IID variables where the variance of the marginal distribution is finite, then the sum of the variables is converging in distribution to a **Normal distribution**.
+# Thus, if $X_1,X_2,\dots,X_n$ are IID variables where $\mathbb{E}(X_i)=\mu$ and $\mathbb{V}(X_i)=\sigma^2$, then for $W_n=\sum_{i=1}^n X_i$ we can write
+# \begin{equation}
+# W_n \overset{\rm d}{\longrightarrow} N(n\mu,\sqrt{n}\sigma), \nonumber
+# \end{equation}
+# where we used the fact that both the sum and the variance can be simply summed for independent variables. As we can see, when $n\rightarrow\infty$, we obtain a Normal distribution with infinitely large mean and variance.
+# The usual trick is to consider a **standardised** version of the sum of the variables, where we shift the variable such that the mean becomes 0 and rescale the variable such that the variance becomes 1. In this case this can be done simply by defining $Z_n$ as
+# \begin{equation}
+# Z_n =\frac{\left(\sum_{i=1}^n X_i\right) -n\mu}{\sqrt{n}\sigma}=
+# \frac{\frac{1}{n}\left(\sum_{i=1}^n X_i\right) - \mu}{\sigma/\sqrt{n}} =\frac{\sqrt{n}\left(\overline{X_n}-\mu\right)}{\sigma}
+# \end{equation}
+# which is converging to standard Normal in distribution
+# \begin{equation}
+# Z_n\overset{\rm d}{\longrightarrow}N(0,1).
+# \end{equation}
 # %% [python]
 
 num_pts = 20_000
@@ -69,35 +75,40 @@ def plot_sum_dist(sum_distr_list, chosen_distr_id):
     x_list = np.arange(-4, 4, 0.1)
     y_list = [np.exp(-0.5 * x**2) / np.sqrt(2.0 * np.pi) for x in x_list]
     plt.plot(x_list, y_list)
-    plt.xlabel(r"$\\frac{x-\\overline{X}}{\\rm sd}$")
+    plt.xlabel(r"$\frac{x\neg\overline{X}}{\rm \sigma}$", fontsize=10, loc="left")
     plt.ylim(0, 1.0)
     plt.xlim(-4, 4)
     plt.show()
 
 
-# %%
-
-
-sum_distr_list = [sum_dist(distr_list, num_in_sum) for num_in_sum in range(1, n + 1)]
-
+# sum_distr_list = [sum_dist(distr_list, num_in_sum) for num_in_sum in range(1, n + 1)]
 # TODO - Fix this ipywidget ValueError during runtime. : cannot find widget or abbreviation for argument: 'sum_distr_list'
-ipy.interact(
-    plot_sum_dist,
-    s_distr_list=ipy.fixed(sum_distr_list),
-    chosen_distr_id=ipy.IntSlider(
-        min=1, max=n, step=1, value=1, description="num. distr. summed"
-    ),
+
+# x = widgets.interact(
+#     plot_sum_dist,
+#     s_distr_list=widgets.fixed(sum_distr_list),
+#     chosen_distr_id=widgets.IntSlider(
+#         min=1, max=n, step=1, value=1, description="num. distr. summed"
+#     ),
+# )
+# display(x)
+
+sdist = widgets.fixed(sum_distr_list)
+chosen_distr_id = widgets.IntSlider(
+    min=1, max=4, step=1, value=1, description="numerical distribution summed"
 )
+widgets.interact(plot_sum_dist, sdist, chosen_distr_id)
+
 
 # %%
 
 exp_distr_list = [np.random.exponential(3.0, num_pts) for i in range(0, n)]
 sum_exp_distr = [sum_dist(exp_distr_list, num_in_sum) for num_in_sum in range(1, n + 1)]
 
-ipy.interact(
+widgets.interact(
     plot_sum_dist,
-    s_distr_list=ipy.fixed(sum_distr_list),
-    chosen_distr_id=ipy.IntSlider(
+    s_distr_list=widgets.fixed(sum_distr_list),
+    chosen_distr_id=widgets.IntSlider(
         min=1, max=n, step=1, value=1, description="num. distr. summed"
     ),
 )
@@ -110,9 +121,8 @@ pareto_dist_list = [np.random.pareto(pareto_a, num_pts) for i in range(0, n)]
 
 # %% [markdown]
 """
-Key difference is that if the PDF of the marginal is decaying as $$x^{-\\alpha}$$ (where $$2<\\alpha<3$$), then we have to 'standardise'
- the sum by dividing with $$n^{\\frac{1}{\\mu}}$$ where $$\\mu={\\alpha-1}$$.
-Thus the summing function in this case has to take an argument corresponding to \\mu as well.
+Key difference is that if the PDF of the marginal is decaying as $x^{\neg\alpha}$ (where $2<\alpha<3$), then we have to 'standardise' the sum by dividing with $n^{\frac{1}{\mu}}$ where $\mu={\alpha-1}$.
+Thus the summing function in this case has to take an argument corresponding to \mu as well.
 """
 # %%
 
