@@ -1,20 +1,14 @@
 # %% [python]
 import numpy as np
+import warnings
 import matplotlib as mp
 import matplotlib.pyplot as plt
 
 # import math as mt
-from ipywidgets import (
-    interact,
-    interactive,
-    fixed,
-    IntSlider,
-    FloatSlider,
-    embed,
-    interact_manual,
-)
+from ipywidgets import interact, interactive, fixed, IntSlider, FloatSlider, embed, interact_manual
 import ipywidgets as widgets
 from functools import reduce
+warnings.filterwarnings('ignore')
 
 # %% [markdown] {"incorrectly_encoded_metadata": "{markdown}"}
 # ##### The 'classical' Central Limit Theorem states that if have IID variables where the variance of the marginal distribution is finite, then the sum of the variables is converging in distribution to a **Normal distribution**.
@@ -33,7 +27,6 @@ from functools import reduce
 # Z_n\overset{\rm d}{\longrightarrow}N(0,1).
 # \end{equation}
 # %% [python]
-
 num_pts = 20_000
 n = 50
 
@@ -44,8 +37,6 @@ n = 50
 # the *standardisation* in the process (subtract the mean and divide by the std)
 distr_list = [np.random.uniform(low=0, high=1, size=num_pts) for i in range(0, n)]
 # %%
-
-
 def sum_dist(distr_list, sum_size):
     s_distr = [
         sum([distr_list[i][j] for i in range(0, sum_size)])
@@ -60,13 +51,11 @@ sum_distr_list = [sum_dist(distr_list, num_in_sum) for num_in_sum in range(1, n 
 
 plt.clf()
 for s_distr in sum_distr_list[:2]:
-    hist, bins = np.histogram(s_distr, bins=100, normed=True)
+    hist, bins = np.histogram(s_distr, bins=100, normed=True) # type: ignore
     plt.plot(bins[:-1], hist, "o", alpha=0.2)
     plt.ylim(0, 1.0)
 plt.show()
 # %%
-
-
 def plot_sum_dist(sum_distr_list, chosen_distr_id):
     hist, bins = np.histogram(
         sum_distr_list[chosen_distr_id - 1], bins=100, normed=True
@@ -75,7 +64,7 @@ def plot_sum_dist(sum_distr_list, chosen_distr_id):
     x_list = np.arange(-4, 4, 0.1)
     y_list = [np.exp(-0.5 * x**2) / np.sqrt(2.0 * np.pi) for x in x_list]
     plt.plot(x_list, y_list)
-    plt.xlabel(r"$\frac{x\neg\overline{X}}{\rm \sigma}$", fontsize=10, loc="left")
+    plt.xlabel(r"$\frac{x-\overline{X}}{\rm sd}$", fontsize = 10, loc='left')
     plt.ylim(0, 1.0)
     plt.xlim(-4, 4)
     plt.show()
@@ -93,11 +82,17 @@ def plot_sum_dist(sum_distr_list, chosen_distr_id):
 # )
 # display(x)
 
-sdist = widgets.fixed(sum_distr_list)
-chosen_distr_id = widgets.IntSlider(
-    min=1, max=4, step=1, value=1, description="numerical distribution summed"
-)
-widgets.interact(plot_sum_dist, sdist, chosen_distr_id)
+
+interact(plot_sum_dist,
+         s_distr_list=fixed(sum_distr_list),
+         chosen_distr_id=IntSlider(
+             min=1,
+             max=n,
+             step=1,
+             value=1,
+            description="num. distr. summed"
+            )
+        )
 
 
 # %%
@@ -126,10 +121,9 @@ Thus the summing function in this case has to take an argument corresponding to 
 """
 # %%
 
-
 def sum_pareto(distr_list, sum_size, mu):
     s_distr = [
-        sum([distr_list[i][j]] for i in range(0, sum_size))
+        sum([distr_list[i][j]] for i in range(0, sum_size)) # type: ignore
         for j in range(0, len(distr_list[0]))
     ]
     s_mu = np.mean(s_distr)
